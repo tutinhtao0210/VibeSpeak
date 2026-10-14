@@ -1,249 +1,95 @@
-# SkillBloom --- Học một chút, tiến bộ mỗi ngày
+# PRD: VibeSpeak — Luyện Nói & Kỹ Năng
 
-**Loại sản phẩm:** Website tự học và theo dõi tiến bộ cá nhân\
-**Lĩnh vực:** Giáo dục / EdTech\
-**Đối tượng:** Người đi làm muốn tự học tiếng Anh giao tiếp, kỹ năng mềm
-và kiến thức nghề nghiệp\
-**Thông điệp:** Mỗi ngày 15 phút, xây dựng một phiên bản tốt hơn của
-chính mình.
+## 1. Tên sản phẩm
+VibeSpeak — Luyện Nói & Kỹ Năng
 
-## 1. Bài toán cần giải quyết
+## 2. Mục tiêu & đối tượng
+- Đối tượng: Người lớn tự học tiếng Anh, muốn cải thiện giao tiếp và kỹ năng nghề nghiệp (phỏng vấn, thuyết trình, email).
+- Mục tiêu: Ứng dụng web đơn giản, giao diện đẹp, ấn tượng, tập trung vào luyện nói và kiểm tra kiến thức nhanh (MCQ + đọc aloud). Triển khai nhanh trên Vibe Host bằng một file HTML/CSS/JS.
 
-Người đi làm muốn nâng cao năng lực nhưng thường thiếu thời gian, khó
-duy trì thói quen học và không biết mình đã tiến bộ đến đâu. Tài liệu
-học tập nằm rải rác; mục tiêu lớn thường không được chia thành những
-bước nhỏ; việc học cũng thiếu cơ hội áp dụng kiến thức vào tình huống
-thực tế.
+## 3. Điểm khác biệt (Unique Selling Points)
+- Kết hợp trắc nghiệm kiến thức + bài đọc aloud (ghi âm) trong cùng một bài luyện.
+- Chấm điểm phát âm tức thì trên trình duyệt (không cần upload) bằng Web Speech API + phân tích âm lượng để có điểm tương đối đáng tin cậy.
+- Thiết kế "bài luyện ngày" (daily practice) nâng dần độ khó — tạo thói quen, chuỗi (streak) và xếp hạng (leaderboard).
+- Giao diện hiện đại, tương phản, animation mượt, tối ưu cho desktop & mobile.
+- MVP đơn giản: chạy hoàn toàn client-side (localStorage) để dễ triển khai; mở rộng lên backend nếu cần leaderboard toàn cầu và lưu file audio.
 
-SkillBloom biến mục tiêu học tập thành các nhiệm vụ ngắn, kết hợp bài
-học cô đọng với bài thực hành tình huống và cung cấp bảng theo dõi tiến
-bộ dựa trên hoạt động thực tế của người dùng.
+## 4. MVP Scope
+- One-page app (index.html) hiển thị:
+  - Đăng nhập tên (local).
+  - Bài luyện 20 câu MCQ + mỗi câu có target sentence để đọc.
+  - Ghi âm phát âm, playback.
+  - Tự động chấm điểm MCQ + chấm "phát âm" bằng bản chấm client-side.
+  - Lưu kết quả, streak, leaderboard cục bộ (localStorage).
+  - Nút "Nghe mẫu" dùng SpeechSynthesis.
 
-## 2. Người dùng mục tiêu
+## 5. Chức năng chi tiết
+- Landing / Login tên người dùng.
+- Bắt đầu bài luyện (20 câu).
+- Mỗi câu:
+  - Hiện câu hỏi + 4 lựa chọn (MCQ).
+  - Khi chọn, hiện đáp án đúng/sai.
+  - Hiển thị câu mẫu để đọc (target sentence).
+  - Nút Record / Stop / Play.
+  - Tự động nhận dạng câu nói (SpeechRecognition) và hiển thị transcript.
+  - Hiển thị điểm phát âm (0–100) và phân tích (tỉ lệ từ đúng, mức âm).
+- Sau bài: tổng hợp điểm MCQ, điểm phát âm, tổng điểm, cập nhật streak, hiển thị leaderboard cục bộ.
+- Lưu lịch sử attempt (ngày, điểm).
+- Settings: reset data, chỉnh sensitivity mic (nếu cần).
 
--   Người đi làm bận rộn muốn cải thiện tiếng Anh công sở.
--   Người tự học kỹ năng giao tiếp, quản lý thời gian, giải quyết vấn đề
-    hoặc kiến thức nghề nghiệp.
--   Người muốn có kế hoạch học rõ ràng và nhìn thấy kết quả mà không cần
-    sử dụng một hệ thống quản lý khóa học phức tạp.
+## 6. Tech stack (MVP)
+- Frontend: HTML / CSS / JavaScript (vanilla).
+- Browser APIs:
+  - getUserMedia + MediaRecorder (ghi âm & playback).
+  - Web Speech API (SpeechRecognition) — để chuyển lời nói thành transcript.
+  - SpeechSynthesis — phát mẫu.
+  - Web Audio API AnalyserNode — đo mức âm lượng để ước tính clarity.
+- Storage: localStorage (MVP). Optional: REST API + DB nếu cần lưu global leaderboard.
+- Hosting: Vibe Host (chỉ upload index.html).
 
-**Nhu cầu cốt lõi:** Biết hôm nay nên học gì, thực hành ngay và thấy
-được mình đang tiến bộ ra sao.
+## 7. Database Schema (đề xuất server-side)
+- users
+  - id (uuid), name, email, created_at, last_active
+- questions
+  - id, text, options (json), correct_option, target_sentence, difficulty
+- attempts
+  - id, user_id, date, mcq_score, speaking_scores (json per question), total_score
+- recordings
+  - id, attempt_id, question_id, file_url, duration, transcript, score
+- leaderboard (materialized)
+  - user_id, best_score, streak, last_active
 
-## 3. Giá trị khác biệt
+MVP localStorage keys:
+- user: {name, id}
+- questions: [ ... ]
+- attempts: [ {date, total, details} ]
+- leaderboard: derived from attempts
 
-SkillBloom không cố trở thành một thư viện khóa học lớn. Sản phẩm tập
-trung vào vòng lặp học tập ngắn:
+## 8. Workflow người dùng
+1. Người dùng vào trang, nhập tên.
+2. Bấm "Start daily test" → hiển thị câu 1.
+3. Người dùng trả lời MCQ → nhận feedback.
+4. Người dùng nghe mẫu (nếu muốn) → bấm Record → đọc target sentence → Stop.
+5. Ứng dụng chạy SpeechRecognition (song song) và ghi âm bằng MediaRecorder; tính điểm phát âm từ transcript và mức âm.
+6. Hiển thị điểm, lưu attempt, cập nhật streak.
+7. Sau 20 câu, hiển thị tổng kết + xếp hạng.
+8. Người dùng có thể xem lịch sử/đổi tên/reset.
 
-1.  **Daily Bloom:** Chọn một nhiệm vụ học tập nhỏ, có thời lượng mục
-    tiêu khoảng 15 phút.
-2.  **Real-life Lab:** Áp dụng kiến thức vào tình huống thực tế như viết
-    email cho khách hàng, xử lý phản hồi, thuyết trình hoặc quản lý thời
-    gian.
-3.  **Growth Map:** Xem lịch sử học, điểm thực hành, nhiệm vụ hoàn thành
-    và những nội dung cần ôn lại.
+## 9. Acceptance Criteria (mốc chấm)
+- Có 20 câu MCQ + target sentences.
+- Ghi âm và phát lại hoạt động trên Chrome/Edge (Web Speech API có thể hạn chế trên Safari).
+- SpeechRecognition trả transcript; app tính điểm phát âm hiển thị rõ ràng.
+- Streak được lưu và cập nhật đúng khi người dùng luyện hàng ngày.
+- UI responsive, sạch, deploy được bằng upload index.html lên Vibe Host.
 
-Các chức năng cốt lõi sử dụng nội dung biên soạn sẵn và logic ứng dụng
-thông thường; không bắt buộc tích hợp AI hoặc API trả phí.
+## 10. Kế hoạch triển khai (2 tuần MVP)
+- Ngày 1–2: Thiết kế UI / chuẩn bị câu hỏi.
+- Ngày 3–5: Lập trình core quiz + MCQ logic + localStorage.
+- Ngày 6–8: Thêm ghi âm, playback, SpeechRecognition, scoring.
+- Ngày 9–11: UX polish, animations, leaderboard, streak logic.
+- Ngày 12–14: Test cross-browser, chỉnh lỗi, deploy lên Vibe Host.
 
-## 4. Phạm vi sản phẩm phiên bản đầu tiên
-
-### 4.1. Quản lý mục tiêu và nhiệm vụ học tập
-
--   Tạo, xem, chỉnh sửa và xóa mục tiêu học tập.
--   Phân loại mục tiêu: Tiếng Anh, Kỹ năng mềm, Kiến thức nghề nghiệp.
--   Tạo nhiệm vụ với tiêu đề, mô tả, thời lượng dự kiến và hạn hoàn
-    thành.
--   Cập nhật trạng thái: Chưa học, Đang học, Đã hoàn thành.
--   Xem các nhiệm vụ sắp đến hạn và quá hạn.
-
-### 4.2. Thư viện bài học và bài thực hành
-
--   Hiển thị danh sách bài học mẫu theo nhóm kỹ năng.
--   Mỗi bài có mục tiêu, nội dung ngắn, câu hỏi thực hành và giải thích
-    đáp án.
--   Hỗ trợ câu hỏi trắc nghiệm hoặc lựa chọn cách xử lý tình huống.
--   Chấm điểm dựa trên đáp án được biên soạn trước.
--   Lưu kết quả, thời lượng học và thời điểm hoàn thành.
-
-### 4.3. Dashboard tiến bộ
-
--   Hiển thị số bài đã học, số nhiệm vụ hoàn thành và tổng thời gian học
-    đã ghi nhận.
--   Hiển thị tỷ lệ hoàn thành nhiệm vụ theo tuần.
--   Thống kê điểm thực hành theo nhóm kỹ năng.
--   Liệt kê nhiệm vụ cần ưu tiên.
--   Tính toán số ngày học liên tiếp dựa trên hoạt động học đã lưu, không
-    chỉ dựa vào việc mở website.
-
-### 4.4. Giao diện và trải nghiệm
-
--   Thiết kế hiện đại, thân thiện, có khoảng trắng thoáng và phân cấp
-    nội dung rõ.
--   Dùng thẻ nhiệm vụ, thanh tiến độ và biểu đồ đơn giản để làm nổi bật
-    thành quả.
--   Tương thích với máy tính, máy tính bảng và điện thoại.
--   Có trạng thái tải dữ liệu, dữ liệu trống, thông báo thành công và
-    thông báo lỗi dễ hiểu.
-
-## 5. Luồng sử dụng chính
-
-1.  Người dùng mở SkillBloom và xem dashboard.
-2.  Người dùng tạo mục tiêu, ví dụ: "Cải thiện tiếng Anh công sở trong
-    30 ngày".
-3.  Người dùng tạo nhiệm vụ học hoặc chọn một bài học trong thư viện.
-4.  Người dùng đọc nội dung, làm bài thực hành và gửi câu trả lời.
-5.  Hệ thống chấm điểm, hiển thị giải thích và lưu kết quả vào cơ sở dữ
-    liệu.
-6.  Hệ thống cập nhật trạng thái nhiệm vụ, thời gian học và các chỉ số
-    trên dashboard.
-7.  Nếu nhiệm vụ chưa hoàn thành và đã quá hạn, dashboard hiển thị cảnh
-    báo để người dùng điều chỉnh kế hoạch.
-8.  Khi quay lại website, người dùng có thể xem lại lịch sử và tiếp tục
-    nhiệm vụ còn dang dở.
-
-## 6. Thiết kế dữ liệu
-
-Sử dụng cơ sở dữ liệu có khả năng lưu và truy xuất dữ liệu thật. Không
-dùng dữ liệu gắn cứng để giả lập kết quả của các thao tác. Dữ liệu mẫu
-chỉ dùng để khởi tạo nội dung bài học và minh họa lần đầu.
-
-### Bảng `learning_goals`
-
-  Trường          Ý nghĩa
-  --------------- ---------------------
-  `id`            Mã mục tiêu
-  `title`         Tên mục tiêu
-  `category`      Nhóm kỹ năng
-  `description`   Mô tả mục tiêu
-  `start_date`    Ngày bắt đầu
-  `target_date`   Ngày mục tiêu
-  `status`        Trạng thái mục tiêu
-  `created_at`    Thời điểm tạo
-
-### Bảng `learning_tasks`
-
-  Trường                Ý nghĩa
-  --------------------- ----------------------
-  `id`                  Mã nhiệm vụ
-  `goal_id`             Mã mục tiêu liên kết
-  `title`               Tên nhiệm vụ
-  `description`         Mô tả nhiệm vụ
-  `estimated_minutes`   Thời lượng dự kiến
-  `due_date`            Hạn hoàn thành
-  `status`              Trạng thái nhiệm vụ
-  `completed_at`        Thời điểm hoàn thành
-  `created_at`          Thời điểm tạo
-
-### Bảng `lessons`
-
-  Trường                 Ý nghĩa
-  ---------------------- ---------------------------
-  `id`                   Mã bài học
-  `title`                Tên bài học
-  `category`             Nhóm kỹ năng
-  `learning_objective`   Mục tiêu bài học
-  `content`              Nội dung kiến thức
-  `exercise_type`        Loại bài thực hành
-  `questions`            Dữ liệu câu hỏi và đáp án
-  `explanations`         Giải thích đáp án
-
-### Bảng `learning_records`
-
-  Trường               Ý nghĩa
-  -------------------- ---------------------------------------
-  `id`                 Mã lượt học
-  `lesson_id`          Mã bài học liên kết
-  `task_id`            Mã nhiệm vụ liên kết, có thể để trống
-  `score`              Điểm thực hành
-  `duration_minutes`   Thời gian học được ghi nhận
-  `completed_at`       Thời điểm hoàn thành
-
-### Quan hệ và quy tắc dữ liệu
-
--   Một mục tiêu có thể có nhiều nhiệm vụ.
--   Một bài học có thể có nhiều lượt học.
--   Một lượt học có thể liên kết với một nhiệm vụ.
--   Dashboard tính toán số liệu từ các bản ghi đã lưu.
--   Nếu triển khai đăng nhập, bổ sung bảng người dùng và trường
-    `user_id` cho dữ liệu cá nhân; chỉ người sở hữu mới được đọc hoặc
-    sửa dữ liệu đó.
--   Kiểm tra dữ liệu bắt buộc, trạng thái hợp lệ và quan hệ khóa ngoại
-    trước khi lưu.
-
-## 7. Workflow và logic xử lý
-
-### Workflow A --- Hoàn thành bài học
-
-**Mở bài học → Trả lời câu hỏi → Kiểm tra đáp án → Tính điểm → Lưu lượt
-học → Cập nhật dashboard.**
-
-Nếu lưu dữ liệu thất bại, hiển thị thông báo lỗi và không báo rằng bài
-học đã được lưu thành công.
-
-### Workflow B --- Quản lý nhiệm vụ quá hạn
-
-Khi dashboard tải dữ liệu, hệ thống so sánh hạn hoàn thành với ngày hiện
-tại. Nếu nhiệm vụ đã quá hạn và chưa hoàn thành, hiển thị cảnh báo.
-Trạng thái quá hạn được tính từ dữ liệu và thời gian hiện tại, không cần
-thay đổi trạng thái gốc của nhiệm vụ.
-
-### Workflow C --- Tính tiến độ
-
--   Tỷ lệ hoàn thành = số nhiệm vụ hoàn thành / tổng số nhiệm vụ thuộc
-    phạm vi thống kê.
--   Tổng thời gian học = tổng thời lượng của các lượt học hợp lệ đã lưu.
--   Điểm theo kỹ năng = tổng hợp điểm của các lượt học thuộc nhóm kỹ
-    năng tương ứng.
--   Chuỗi ngày học = số ngày liên tiếp có ít nhất một hoạt động học được
-    ghi nhận.
-
-Nếu chưa có dữ liệu, hiển thị trạng thái hướng dẫn bắt đầu học thay vì
-hiển thị số liệu giả.
-
-## 8. Dữ liệu mẫu khởi tạo
-
-Tạo tối thiểu 8--10 bài học mẫu, ví dụ:
-
--   Viết email xác nhận thông tin bằng tiếng Anh.
--   Trả lời khách hàng khi cần thêm thời gian xử lý.
--   Cách đưa ra phản hồi mang tính xây dựng.
--   Ưu tiên công việc theo mức độ quan trọng.
--   Chuẩn bị nội dung cho một bài thuyết trình ngắn.
--   Xử lý một tình huống giao tiếp khó tại nơi làm việc.
-
-Nội dung bài học, câu hỏi, đáp án và giải thích phải nhất quán. Không sử
-dụng dữ liệu khách hàng thật hoặc tài liệu nội bộ.
-
-## 9. Ngoài phạm vi phiên bản đầu tiên
-
--   Chatbot hoặc gia sư AI.
--   Chấm phát âm bằng AI.
--   Lớp học trực tuyến và tương tác giữa nhiều người dùng.
--   Thanh toán, gói thuê bao hoặc marketplace khóa học.
--   Ứng dụng di động riêng.
--   Tích hợp lịch hoặc gửi email nhắc việc từ dịch vụ bên thứ ba.
-
-## 10. Tiêu chí nghiệm thu
-
--   Website hiển thị tốt trên máy tính và điện thoại.
--   Có ít nhất ba nhóm chức năng hoạt động: quản lý mục tiêu/nhiệm vụ,
-    học và thực hành, dashboard tiến bộ.
--   Tạo, sửa, xóa mục tiêu và nhiệm vụ được; dữ liệu vẫn còn sau khi tải
-    lại trang.
--   Người dùng làm bài, xem điểm và giải thích; kết quả được lưu và có
-    thể xem lại.
--   Các số liệu trên dashboard được tính từ dữ liệu đã lưu.
--   Cảnh báo nhiệm vụ quá hạn hoạt động đúng.
--   Có trạng thái rỗng, thông báo thành công và lỗi rõ ràng.
--   Các nút bấm chính đều thực hiện đúng hành động.
--   Không có lỗi nghiêm trọng trong luồng sử dụng chính.
--   Dữ liệu minh họa là dữ liệu giả và không chứa thông tin nhạy cảm.
-
-## 11. Kết quả kỳ vọng
-
-SkillBloom giúp người đi làm chuyển mục tiêu học tập thành các bước nhỏ
-có thể thực hiện mỗi ngày. Giá trị của sản phẩm được thể hiện qua một
-vòng lặp hoàn chỉnh: lập kế hoạch, học, thực hành, lưu kết quả và theo
-dõi tiến bộ. Phiên bản đầu tiên ưu tiên tính khả dụng, dữ liệu thật,
-trải nghiệm giao diện và phạm vi triển khai vừa sức.
+## 11. Mở rộng sau MVP
+- Backend + storage audio, global leaderboard.
+- Tích hợp pronunciation scoring service (Google/DeepSpeech/3rd-party) để có điểm chính xác hơn.
+- Thống kê tiến bộ theo tuần/tháng, bài học đề xuất.
