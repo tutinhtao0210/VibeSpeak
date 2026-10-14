@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VibeSpeak — Luyện Nói & Kỹ Năng (Pink)</title>
+<style>
+  :root{
+    --bg:#fff0f6;
+    --card:#ffffff;
+    --accent:#ff5fa8; /* pink primary */
+    --accent2:#ff9ac8;
+    --muted:#7a3a4a;
+    --glass: rgba(255,255,255,0.6);
+    --shadow: rgba(255,95,168,0.12);
+  }
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{
+    background: linear-gradient(180deg,var(--bg), #ffeaf3);
+    color:#3a1230; display:flex; align-items:center; justify-content:center; padding:28px;
+  }
+  .container{width:100%;max-width:1100px;}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .logo{display:flex;gap:12px;align-items:center}
+  .badge{background:linear-gradient(90deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:12px;font-weight:700;color:white}
+  .card{background:var(--card); border-radius:16px; padding:18px; box-shadow:0 10px 30px var(--shadow);}
+  .main{display:grid;grid-template-columns:360px 1fr; gap:18px}
+  .sidebar{padding:16px;min-height:560px}
+  .content{padding:18px;min-height:560px}
+  label,input{display:block}
+  input[type=text]{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(200,150,170,0.25);background:transparent;color:inherit}
+  button{background:var(--accent);border:none;padding:10px 14px;border-radius:12px;color:white;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,95,168,0.15)}
+  .muted{color:var(--muted);font-size:13px}
+  .question-list{margin-top:10px;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;padding-right:6px}
+  .qitem{padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,250,252,0.6), rgba(255,245,250,0.4));display:flex;align-items:center;justify-content:space-between}
+  .progress{height:12px;background:rgba(200,150,170,0.12);border-radius:8px;overflow:hidden}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .mcq-options{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+  .opt{padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fff);cursor:pointer;border:1px solid rgba(255,95,168,0.06)}
+  .opt:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(255,95,168,0.06)}
+  .opt.correct{outline:3px solid #6ef0b1;background:linear-gradient(90deg,#f0fff8,#f7fff6)}
+  .opt.wrong{outline:3px solid #ffb3b3;background:linear-gradient(90deg,#fff5f6,#fff8f9)}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .rec-btn{background:linear-gradient(90deg,#ff6fa3,#ff9ac8);color:white;padding:10px 14px;border-radius:12px;font-weight:800}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .stat{background:linear-gradient(90deg,#fff5f8,#fff8fb);padding:8px 10px;border-radius:10px;color:var(--muted);border:1px solid rgba(250,200,230,0.6)}
+  footer{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}
+  .center{display:flex;align-items:center;gap:10px}
+  .bigscore{font-size:32px;font-weight:800;color:var(--accent)}
+  .leader{margin-top:12px}
+  @media (max-width:1000px){
+    .main{grid-template-columns:1fr; }
+    .sidebar{order:2}
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:900;color:white">VS</div>
+        <div>
+          <div style="font-size:20px;font-weight:800;color:#3a1230">VibeSpeak</div>
+          <div class="muted" style="margin-top:6px">Luyện Nói & Kỹ Năng — Thân thiện, tươi sáng</div>
+        </div>
+      </div>
+      <div class="badge">Vibe Code Challenge — Mắt Bão</div>
+    </header>
+
+    <div class="main">
+      <aside class="sidebar card">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="muted">Người dùng</div>
+              <div style="font-weight:800" id="usernameLabel">Khách vãng lai</div>
+            </div>
+            <div>
+              <button id="btnChangeUser" style="background:transparent;color:var(--accent);border:1px solid rgba(255,95,168,0.12);padding:6px 10px;border-radius:10px">Đổi</button>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div class="muted">Bài luyện</div>
+            <div style="font-weight:800;font-size:18px">Lấy 20 câu ngẫu nhiên / session (pool ~1000 câu)</div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="muted">Tiến độ</div>
+            <div class="progress" style="margin-top:8px"><i id="progBar" style="width:0%"></i></div>
+            <div style="margin-top:10px;display:flex;justify-content:space-between">
+              <div class="muted">Câu <span id="currentIdx">0</span>/20</div>
+              <div class="muted">Điểm: <span id="totalScore">0</span></div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="muted">Streak</div>
+            <div style="font-weight:800;font-size:18px" id="streakCount">0 ngày</div>
+          </div>
+
+          <div class="leader card" style="padding:10px;margin-top:12px;background:linear-gradient(90deg,#fff5f8,#fff8fb);">
+            <div style="font-weight:800">Leaderboard (local)</div>
+            <div id="leaderboard" style="margin-top:8px;color:var(--muted);font-size:14px"></div>
+          </div>
+
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button id="startBtn">Bắt đầu</button>
+          <button id="resetBtn" style="background:#ffb3c9;color:#3a1230">Reset</button>
+        </div>
+
+        <div style="margin-top:12px" class="muted">
+          Lưu ý: Cho phép microphone; SpeechRecognition hoạt động tốt trên Chrome/Edge.
+        </div>
+      </aside>
+
+      <section class="content card">
+        <div id="screenStart">
+          <div style="font-size:20px;font-weight:800;color:#3a1230">Chào mừng đến với VibeSpeak</div>
+          <div class="muted" style="margin-top:8px">Nhập tên, bấm Start. Mỗi session lấy 20 câu khác nhau từ pool ~1000 câu.</div>
+          <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
+            <input id="username" type="text" placeholder="Nhập tên của bạn (vd: Huy)" />
+            <button id="saveUser">Lưu tên</button>
+          </div>
+        </div>
+
+        <div id="screenQuiz" style="display:none">
+          <div style="display:flex;justify-content:space-between">
+            <div>
+              <div class="muted">Câu hỏi</div>
+              <div style="font-weight:800;font-size:18px" id="qText">...</div>
+            </div>
+            <div style="text-align:right">
+              <div class="muted">Độ khó</div>
+              <div id="qDiff" style="font-weight:800">-</div>
+            </div>
+          </div>
+
+          <div class="mcq-options" id="options"></div>
+
+          <div style="margin-top:14px">
+            <div class="muted">Câu mẫu để đọc</div>
+            <div style="font-weight:700" id="targetSentence">...</div>
+            <div style="margin-top:10px" class="controls">
+              <button id="playModel">Nghe mẫu</button>
+              <button class="rec-btn" id="recBtn">Ghi âm</button>
+              <button id="stopBtn" disabled style="background:#ffd6e8;color:#3a1230;border:1px solid rgba(255,95,168,0.08)">Stop</button>
+              <button id="playAudio" disabled style="background:#fff;color:var(--accent);border:1px solid rgba(255,95,168,0.12)">Phát lại</button>
+              <button id="score10Btn" style="background:linear-gradient(90deg,#ffd6e8,#ff9ac8);color:#3a1230;font-weight:800">Chấm (0–10)</button>
+              <div id="recStatus" class="muted">Chưa ghi âm</div>
+            </div>
+
+            <div class="stats" id="speakingStats" style="margin-top:12px">
+              <div class="stat">Transcript: <span id="transcript" class="muted">—</span></div>
+              <div class="stat">Pronunciation (0–100): <span id="pronScore">—</span></div>
+              <div class="stat">Score (0–10): <span id="score10">—</span></div>
+              <div class="stat">Loudness: <span id="loudness">—</span></div>
+              <div class="stat" id="passFail" style="font-weight:700">—</div>
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button id="nextBtn" style="background:#ff8fc1">Câu tiếp</button>
+              <button id="finishBtn" style="background:var(--accent)">Hoàn tất</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="screenResult" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="muted">Kết quả bài luyện</div>
+              <div class="bigscore" id="finalScore">0</div>
+              <div class="muted">MCQ + Speaking</div>
+            </div>
+            <div style="text-align:right">
+              <div class="muted">Tên</div>
+              <div style="font-weight:800" id="finalUser">Khách</div>
+              <div class="muted" style="margin-top:6px">Streak</div>
+              <div id="finalStreak" style="font-weight:800">0</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div style="font-weight:800">Chi tiết</div>
+            <div id="resultDetails" class="muted" style="margin-top:8px"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button id="startNew" style="background:#ff6fa3">Bắt đầu bộ 20 câu khác</button>
+          </div>
+
+        </div>
+
+        <footer class="muted">MVP — chạy trên Chrome/Edge. SpeechRecognition có thể không hoạt động trên mọi trình duyệt.</footer>
+      </section>
+    </div>
+  </div>
+
+<script>
+/* ===== Pool generator: tạo pool ~1000 câu từ template nhỏ ===== */
+const BASE_TEMPLATES = [
+  {q:"Choose the correct past form of 'go'.", options:["went","goed","go","gone"], correct:0, target:"I went to the office yesterday.", diff:"Easy"},
+  {q:"Fill the blank: 'She ___ a doctor.'", options:["is","are","am","be"], correct:0, target:"She is a doctor at the city hospital.", diff:"Easy"},
+  {q:"What is the opposite of 'increase'?", options:["decrease","rise","grow","up"], correct:0, target:"We need to decrease costs this quarter.", diff:"Easy"},
+  {q:"Choose correct preposition: 'He is good ___ programming'.", options:["at","in","on","of"], correct:0, target:"He is good at solving technical problems.", diff:"Easy"},
+  {q:"Choose correct article: '___ apple a day keeps the doctor away'.", options:["A","The","An","Ø"], correct:2, target:"An apple a day keeps the doctor away.", diff:"Easy"},
+  {q:"Select synonym of 'improve'.", options:["enhance","weaken","ignore","break"], correct:0, target:"We want to enhance our presentation skills.", diff:"Medium"},
+  {q:"Which is passive voice of 'They completed the project'?", options:["The project was completed by them.","The project completed by them.","The project is completed.","They were completed the project."], correct:0, target:"The project was completed by the team last month.", diff:"Medium"},
+  {q:"Business phrase: 'Let’s touch base' means?", options:["meet","ignore","cancel","finish"], correct:0, target:"Let's touch base to align on the deliverables.", diff:"Medium"},
+  {q:"Choose correct modal: 'You ___ submit the report by Friday' (obligation)", options:["must","may","can","might"], correct:0, target:"You must submit the report by Friday.", diff:"Medium"},
+  {q:"Choose correct tense: 'By next year I ___ there for five years'.", options:["will have been","will be","have been","had been"], correct:0, target:"By next year I will have been working here for five years.", diff:"Medium"},
+  {q:"Choose correct collocation: 'Make a ___ decision'.", options:["quick","heavy","tall","short"], correct:0, target:"We need to make a quick decision.", diff:"Medium"},
+  {q:"Which sentence is more formal?", options:["Could you please provide the details?","Give me the details.","Send details pls.","Gimme details."], correct:0, target:"Could you please provide the details at your earliest convenience?", diff:"Medium"},
+  {q:"Select the best subject line for a client email.", options:["Meeting follow-up","Yo, meeting","Meeting stuff","Sup."], correct:0, target:"Following up on our meeting: next steps and timeline.", diff:"Medium"},
+  {q:"Identify the error: 'He don't like coffee'.", options:["don't → doesn't","like → likes","He → They","coffee → teas"], correct:0, target:"He doesn't like coffee, but he enjoys tea.", diff:"Medium"},
+  {q:"Choose correct phrase: 'I look forward ___ hearing from you'.", options:["to","for","on","in"], correct:0, target:"I look forward to hearing from you soon.", diff:"Advanced"},
+  {q:"Choose correct word: 'This report is ___ to the previous one'.", options:["similar","similar to","similarly","simulate"], correct:1, target:"This report is similar to the previous one in methodology.", diff:"Advanced"},
+  {q:"Professional: 'How to politely decline a meeting?'", options:["Provide a polite template","Ignore the invite","Say no rudely","Reschedule secretly"], correct:0, target:"Thank you for the invitation, but I must decline due to prior commitments.", diff:"Advanced"},
+  {q:"Choose correct conditional: 'If I had known, I ___ helped'.", options:["would have","would","will","had"], correct:0, target:"If I had known about the delay, I would have helped earlier.", diff:"Advanced"},
+  {q:"Choose the best phrase for negotiation: 'We can offer a ___ discount'.", options:["modest","tiny","nothing","heavy"], correct:0, target:"We can offer a modest discount for bulk orders.", diff:"Advanced"},
+  {q:"Choose the correct phrasal verb: 'We need to ___ the deadline' meaning extend", options:["push back","push forward","push out","push in"], correct:0, target:"We need to push back the deadline by two weeks.", diff:"Advanced"}
+];
+
+/* Build a pool of N by cloning templates with small variation */
+function generatePool(N){
+  const pool = [];
+  const places = ["Hanoi","HCM","Da Nang","the office","the client site","the conference"];
+  const numbers = ["one","two","three","four","five"];
+  for(let i=0;i<N;i++){
+    const base = BASE_TEMPLATES[i % BASE_TEMPLATES.length];
+    // shallow clone
+    const clone = {
+      q: base.q,
+      options: shuffleArray(base.options.slice()),
+      // add small variation to target sentence to avoid perfect repetition
+      target: base.target + ` (example ${i+1})`,
+      correctAnswerText: base.options[base.correct],
+      diff: base.diff
+    };
+    // shuffle options and recompute correct index by text match
+    clone.correct = clone.options.findIndex(x => x === clone.correctAnswerText);
+    if(clone.correct < 0) clone.correct = 0;
+    pool.push(clone);
+  }
+  return pool;
+}
+
+function shuffleArray(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+/* ===== State & storage ===== */
+let POOL = generatePool(1000); // ~1000 questions
+let sessionQuestions = []; // 20 chosen for this session
+let state = { user:{name:"Khách vãng lai", id:null}, idx:0, mcqScore:0, speakScores:[], transcript:"", loudness:0 };
+const LS_USER="vibespeak_user", LS_ATT="vibespeak_attempts", LS_STREAK="vibespeak_streak";
+
+/* ===== Utils ===== */
+function $(id){return document.getElementById(id);}
+function saveUserToUI(){ $('usernameLabel').textContent = state.user.name || "Khách vãng lai"; $('finalUser').textContent = state.user.name || "Khách"; }
+function saveUserToStorage(){ localStorage.setItem(LS_USER, JSON.stringify(state.user)); }
+function loadUser(){ const u = localStorage.getItem(LS_USER); if(u) state.user = JSON.parse(u); }
+
+/* ===== Streak & leaderboard (same as before) ===== */
+function loadStreak(){ const s = JSON.parse(localStorage.getItem(LS_STREAK) || '{}'); return s; }
+function saveStreak(obj){ localStorage.setItem(LS_STREAK, JSON.stringify(obj)); }
+function updateStreak(onDate){
+  const today = (new Date(onDate)).toISOString().slice(0,10);
+  const st = loadStreak();
+  if(st.last === today){ return st; }
+  const yesterday = new Date(new Date(onDate).getTime() - 24*3600*1000).toISOString().slice(0,10);
+  let newStreak = 1;
+  if(st.last === yesterday) newStreak = (st.count||0) + 1;
+  const updated = {last: today, count: newStreak};
+  saveStreak(updated);
+  return updated;
+}
+function renderLeaderboard(){
+  const arr = JSON.parse(localStorage.getItem(LS_ATT) || '[]');
+  const best = {};
+  arr.forEach(a => {
+    if(!best[a.user]) best[a.user]=a.total;
+    else best[a.user]=Math.max(best[a.user], a.total);
+  });
+  const rows = Object.keys(best).map(u=>({user:u,score:best[u]})).sort((a,b)=>b.score-a.score).slice(0,5);
+  const el = $('leaderboard'); el.innerHTML="";
+  if(rows.length===0) el.textContent="Chưa có dữ liệu";
+  else rows.forEach(r=>{ const d = document.createElement('div'); d.textContent = `${r.user}: ${r.score}`; el.appendChild(d); });
+}
+function addAttempt(record){
+  const arr = JSON.parse(localStorage.getItem(LS_ATT) || '[]');
+  arr.push(record);
+  localStorage.setItem(LS_ATT, JSON.stringify(arr));
+  renderLeaderboard();
+}
+
+/* ===== Session management: pick 20 random unique from POOL ===== */
+function pickSession(size=20){
+  const indices = new Set();
+  while(indices.size < size){
+    indices.add(Math.floor(Math.random() * POOL.length));
+  }
+  return Array.from(indices).map(i=>POOL[i]);
+}
+
+/* ===== UI flow ===== */
+function showStart(){ $('screenStart').style.display='block'; $('screenQuiz').style.display='none'; $('screenResult').style.display='none'; }
+function showQuiz(){ $('screenStart').style.display='none'; $('screenQuiz').style.display='block'; $('screenResult').style.display='none'; }
+function showResult(){ $('screenStart').style.display='none'; $('screenQuiz').style.display='none'; $('screenResult').style.display='block'; }
+
+function startQuiz(){
+  sessionQuestions = pickSession(20);
+  state.idx = 0; state.mcqScore = 0; state.speakScores = []; state.transcript=""; state.loudness=0;
+  $('totalScore').textContent = 0; $('currentIdx').textContent = 1;
+  updateProgress();
+  showQuiz(); loadQuestion();
+}
+
+/* ===== Render question ===== */
+function updateProgress(){
+  const perc = Math.round((state.idx/20)*100);
+  $('progBar').style.width = perc + '%';
+  $('currentIdx').textContent = Math.min(state.idx+1, 20);
+  $('totalScore').textContent = Math.round(state.mcqScore + (averageSpeakScore() || 0));
+}
+
+function loadQuestion(){
+  const q = sessionQuestions[state.idx];
+  $('qText').textContent = q.q;
+  $('qDiff').textContent = q.diff || '-';
+  $('targetSentence').textContent = q.target;
+  const opts = $('options'); opts.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const el = document.createElement('div'); el.className='opt'; el.textContent = o;
+    el.onclick = ()=>{ answerMCQ(i); 
+      el.classList.add(i===q.correct ? 'correct' : 'wrong');
+      // freeze options
+      Array.from(opts.children).forEach(c=>c.onclick=null);
+      // small delay then allow next
+      setTimeout(()=>{},200);
+    };
+    opts.appendChild(el);
+  });
+  $('transcript').textContent = '—';
+  $('pronScore').textContent = '—';
+  $('score10').textContent = '—';
+  $('loudness').textContent = '—';
+  $('recStatus').textContent = 'Chưa ghi âm';
+  $('passFail').textContent = '—';
+  disablePlayback(true);
+}
+
+/* ===== MCQ handling ===== */
+function answerMCQ(choice){
+  const q = sessionQuestions[state.idx];
+  if(choice === q.correct){
+    state.mcqScore += 5; // mỗi MCQ 5 điểm
+  }
+  updateProgress();
+}
+
+/* ===== Speech & Recording (like previous) ===== */
+let mediaRecorder, recordedChunks = [], audioURL = null;
+let recognition = null;
+let analyser, audioContext, micStream, rafId, loudnessValue = 0;
+
+async function startRecording(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    micStream = audioContext.createMediaStreamSource(stream);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+    micStream.connect(analyser);
+    measureLoudness();
+
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = ()=>{ const blob = new Blob(recordedChunks,{type:'audio/webm'}); audioURL = URL.createObjectURL(blob); $('playAudio').disabled=false; };
+
+    mediaRecorder.start();
+
+    // SpeechRecognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(SpeechRecognition){
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onresult = (e)=>{ const t = e.results[0][0].transcript; state.transcript = t; $('transcript').textContent = t; };
+      recognition.onerror = (e)=>{ console.warn('ASR err', e); };
+      recognition.start();
+    } else {
+      state.transcript = '';
+    }
+
+    $('recStatus').textContent = 'Đang ghi âm...';
+    $('recBtn').disabled=true; $('stopBtn').disabled=false;
+  }catch(err){
+    alert('Không thể truy cập microphone: ' + err.message);
+  }
+}
+
+function measureLoudness(){
+  const buf = new Uint8Array(analyser.fftSize);
+  function loop(){
+    analyser.getByteTimeDomainData(buf);
+    let sum=0;
+    for(let i=0;i<buf.length;i++){ const v = (buf[i]-128)/128; sum += v*v; }
+    const rms = Math.sqrt(sum / buf.length);
+    loudnessValue = rms;
+    $('loudness').textContent = rms.toFixed(3);
+    rafId = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function stopRecording(){
+  if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  if(recognition){ try{ recognition.stop(); } catch(e){} }
+  if(rafId) cancelAnimationFrame(rafId);
+  if(audioContext) audioContext.close();
+  $('recStatus').textContent = 'Đã ghi âm';
+  $('recBtn').disabled=false; $('stopBtn').disabled=true;
+  // compute initial pron score 0..100
+  computePronunciationScore();
+}
+
+/* playback */
+function disablePlayback(v){
+  $('playAudio').disabled = v;
+}
+function playRecording(){
+  if(!audioURL) return;
+  const a = new Audio(audioURL);
+  a.play();
+}
+
+/* compute pron score 0..100 (same logic), also map to 0..10 when requested */
+function computePronunciationScore(){
+  const q = sessionQuestions[state.idx];
+  const expected = q.target.toLowerCase().replace(/[^\w\s']/g,'').split(/\s+/);
+  const recognized = (state.transcript || '').toLowerCase().replace(/[^\w\s']/g,'').split(/\s+/);
+  if(expected.length===0){ setPronScore(0); return; }
+  // word-match tolerance
+  let match=0;
+  for(let i=0, j=0; i<expected.length && j<recognized.length; i++){
+    if(expected[i] === recognized[j]) { match++; j++; }
+    else {
+      if(j+1<recognized.length && expected[i]===recognized[j+1]){ match++; j+=2; }
+      else j++;
+    }
+  }
+  const wordMatch = (match / expected.length); // 0..1
+  const loudNorm = Math.min(1, (loudnessValue / 0.08));
+  const score = Math.round((wordMatch * 0.85 + loudNorm * 0.15) * 100);
+  setPronScore(score);
+}
+
+/* set pron 0..100 and update average */
+function setPronScore(score){
+  state.speakScores.push(score);
+  $('pronScore').textContent = score;
+  $('score10').textContent = '—';
+  const total = Math.round(state.mcqScore + averageSpeakScore());
+  $('totalScore').textContent = total;
+}
+
+/* average speaking score across recorded questions (0..100) */
+function averageSpeakScore(){
+  if(state.speakScores.length===0) return 0;
+  return Math.round(state.speakScores.reduce((a,b)=>a+b,0) / state.speakScores.length);
+}
+
+/* map 0..100 to 0..10 and show pass/fail */
+function scoreToTenAndShow(){
+  // take last speaking score (the most recent)
+  const last = state.speakScores.length ? state.speakScores[state.speakScores.length-1] : 0;
+  const s10 = Math.round(last / 10);
+  $('score10').textContent = s10;
+  const pass = s10 >= 6;
+  $('passFail').textContent = pass ? 'ĐẠT' : 'CHƯA ĐẠT';
+  $('passFail').style.color = pass ? '#0b7' : '#f55';
+}
+
+/* navigation */
+function nextQuestion(){
+  if(state.idx < 19){
+    state.idx++;
+    updateProgress();
+    loadQuestion();
+  } else {
+    alert('Bạn đã đến câu cuối. Bấm Hoàn tất để xem kết quả.');
+  }
+}
+
+function finishQuiz(){
+  const speakAvg = Math.round(averageSpeakScore());
+  const finalTotal = Math.round(state.mcqScore + (speakAvg/10)); // normalize: MCQ up to 100? Keep simple: MCQ total vs speaking avg -> choose final formula
+  // For clarity: let's show combined as MCQ points (5pts each) + speaking avg mapped to 0..20 (here we map 0..100 to 0..20)
+  const speakScaled = Math.round((speakAvg/100) * 20);
+  const combined = state.mcqScore + speakScaled; // MCQ max 100 (20*5=100) + speakScaled max 20 -> total max 120 (but it's fine)
+  $('finalScore').textContent = combined;
+  $('finalUser').textContent = state.user.name;
+  const st = updateStreak(new Date());
+  $('finalStreak').textContent = st.count + ' ngày';
+  const rec = {user: state.user.name, date: new Date().toISOString(), mcq: state.mcqScore, speakAvg, total: combined};
+  addAttempt(rec);
+  $('resultDetails').textContent = `MCQ: ${state.mcqScore} điểm (max 100). Speaking trung bình: ${speakAvg} (0–100) → quy thành ${speakScaled} điểm. Tổng: ${combined} điểm.`;
+  showResult();
+}
+
+/* Start new 20 questions on button */
+$('startNew').onclick = ()=> startQuiz();
+
+/* events */
+$('saveUser').onclick = ()=>{
+  const name = $('username').value.trim();
+  if(name){ state.user.name = name; state.user.id = state.user.id || ('u_' + Math.random().toString(36).slice(2,9)); saveUserToStorage(); saveUserToUI(); alert('Đã lưu tên: ' + name); }
+}
+$('btnChangeUser').onclick = ()=>{ const n = prompt('Nhập tên mới', state.user.name || ''); if(n){ state.user.name = n; saveUserToStorage(); saveUserToUI(); } }
+$('startBtn').onclick = ()=> startQuiz();
+$('resetBtn').onclick = ()=>{ if(confirm('Reset toàn bộ dữ liệu local?')){ localStorage.removeItem(LS_ATT); localStorage.removeItem(LS_STREAK); localStorage.removeItem(LS_USER); location.reload(); } };
+$('recBtn').onclick = ()=> startRecording();
+$('stopBtn').onclick = ()=> stopRecording();
+$('playAudio').onclick = ()=> playRecording();
+$('nextBtn').onclick = ()=> nextQuestion();
+$('finishBtn').onclick = ()=> finishQuiz();
+$('playModel').onclick = ()=>{
+  const q = sessionQuestions[state.idx];
+  const utter = new SpeechSynthesisUtterance(q.target.replace(/\([^)]+\)$/, '').trim());
+  utter.lang='en-US';
+  utter.rate=0.95;
+  speechSynthesis.speak(utter);
+};
+$('score10Btn').onclick = ()=> { computePronunciationScore(); scoreToTenAndShow(); };
+
+/* initial setup */
+loadUser(); saveUserToUI(); renderLeaderboard(); updateProgress(); showStart();
+
+/* helper: advance to next question after selecting option (small delay) */
+document.addEventListener('click', (e)=>{
+  if(e.target && e.target.classList.contains('opt')){
+    setTimeout(()=>{ 
+      // auto-advance if not last
+      if(state.idx < 19) nextQuestion();
+    }, 550);
+  }
+});
+</script>
+</body>
+</html>
