@@ -1,7 +1,12 @@
 {
   "name": "vibespeak",
   "version": "1.0.0",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "build": "echo static site"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
