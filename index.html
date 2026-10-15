@@ -42,7 +42,7 @@ footer{margin-top:12px;color:#a3566a;font-size:13px}
   <header>
     <div class="brand">
       <div class="logo">VS</div>
-      <div><div class="title">VibeSpeak</div><div class="muted">English Learning DNA — Cá nhân hoá lộ trình</div></div>
+      <div><div class="title">Career</div><div class="muted">English Learning DNA — Cá nhân hoá lộ trình</div></div>
     </div>
     <div class="row">
       <input id="username" type="text" placeholder="Nhập tên..." style="width:180px" />
@@ -623,7 +623,7 @@ function initUI(){
   };
   $('continueBtn').onclick = ()=>showTab('speaking');
   $('resetAll').onclick = ()=>{
-    if(!confirm('Reset toàn bộ dữ liệu của VibeSpeak?')) return;
+    if(!confirm('Reset toàn bộ dữ liệu của CareerSpeak?')) return;
     Object.values(K).forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
     location.reload();
   };
