@@ -841,15 +841,7 @@ function startVocabQuiz(){
 /* =========================
    Smart functions & start up
    ========================= */
-function renderNotes(){ renderNotes(); } // placeholder to avoid lint
-function renderVocab(){ renderVocab(); } // placeholder
-function renderReview(){ renderReview(); } // placeholder
-
 // override placeholders above with actual functions already defined
-renderVocab = function(){ const list=document.getElementById('vocabReviewList'); list.innerHTML=''; state.vocab.slice(0,30).forEach((v,i)=>{ const d=document.createElement('div'); d.style.padding='6px'; d.textContent=(v.text||''); list.appendChild(d); }); const fc=document.getElementById('flashcard'); fc.dataset.side='front'; if(state.vocab.length>0) fc.textContent = state.vocab[0].text; else fc.textContent='Click to add a word'; };
-renderReview = function(){ const el=document.getElementById('reviewList'); el.innerHTML=''; state.review.forEach((r,i)=>{ const d=document.createElement('div'); d.style.padding='6px'; d.innerHTML=`${i+1}. <b>${r.type}</b>: ${(r.item.q||r.item.text||r.item.target)||JSON.stringify(r.item)}`; el.appendChild(d); }); };
-renderNotes = function(){ const n=document.getElementById('notes'); n.innerHTML=''; state.notes.forEach((it,i)=>{ const d=document.createElement('div'); d.style.padding='6px'; d.textContent = `${new Date(it.date).toLocaleString()}: ${it.text}`; n.appendChild(d); }); };
-
 function renderCharts(){ updateHeader(); const pc = document.getElementById('progressChart'); // re-draw simple
   const ctx = pc.getContext('2d'); ctx.clearRect(0,0,pc.width,pc.height);
   const arr = state.attempts.slice(0,12).reverse();
