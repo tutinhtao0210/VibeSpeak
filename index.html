@@ -13,7 +13,7 @@ body{margin:0;font-family:"Quicksand","Nunito","Segoe UI",system-ui,sans-serif;c
 header{text-align:center;padding:22px 12px 6px}
 header h1{margin:0;font-size:clamp(28px,6vw,44px);letter-spacing:-.5px;color:var(--p)}
 header p{margin:4px 0 0;color:var(--mut)}
-nav{position:sticky;top:0;z-index:9;display:flex;gap:8px;overflow-x:auto;padding:10px 12px;background:#fff3f8ee;backdrop-filter:blur(6px)}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 8px;max-width:980px;margin:0 auto;padding:12px}
 nav button{flex:none;border:2px solid var(--p3);background:#fff;border-radius:99px;padding:8px 14px;font:inherit;font-weight:700;color:var(--ink);cursor:pointer}
 nav button.on{background:var(--p);border-color:var(--p);color:#fff}
 main{max-width:980px;margin:0 auto;padding:0 14px 60px;position:relative}
@@ -196,7 +196,7 @@ function practice(focus){
 }
 
 /* ===== các màn hình ===== */
-const T=[['home','🏠','Trang chủ'],['practice','📝','Ôn 20 câu'],['daily','☀️','Daily'],['review','🧠','Smart Review'],['dict','🎧','Nghe & điền'],['write','✍️','Viết'],['read','📖','Đọc'],['speak','🎤','Nói'],['real','💬','Thực chiến & AI'],['note','📒','Sổ tay'],['place','🎯','Placement'],['data','🗂','Dữ liệu']];
+const T=[['home','🏠','Trang chủ'],['write','✍️','Viết'],['read','📖','Đọc'],['speak','🎤','Nói'],['practice','📝','Ôn 20 câu'],['daily','☀️','Daily'],['review','🧠','Smart Review'],['dict','🎧','Nghe & điền'],['real','💬','Thực chiến & AI'],['note','📒','Sổ tay'],['place','🎯','Placement'],['data','🗂','Dữ liệu']];
 const views={};
 async function go(t){curTab=t;$('#v').onclick=null;
  $('#nav').innerHTML=T.map(x=>`<button class="${x[0]==t?'on':''}" onclick="go('${x[0]}')">${x[1]} ${x[2]}</button>`).join('');
@@ -280,6 +280,54 @@ views.place=()=>{
   runQuiz(L,{title:'Placement Test',noSeen:true,againLabel:'Xem lộ trình',again:"go('place')",onDone:x=>{const lv=x<=6?1:x<=11?2:x<=16?3:4;P.base=lv;P.place=['A1','A2','B1','B2'][lv-1]+' ('+x+'/20)';save()},endMsg:'Đã lưu kết quả. Bài ôn luyện sẽ bắt đầu từ cấp độ phù hợp với bạn.'})};
 };
 
+/* ===== Bộ sinh đoạn văn tại trình duyệt (dùng khi API chưa sẵn sàng) ===== */
+let OFF=0;
+const GD={
+J:[['nhân viên văn phòng','an office worker','công ty','the company','họp với đồng nghiệp và trả lời thư điện tử','have meetings with my colleagues and answer emails'],['sinh viên','a university student','trường đại học','the university','nghe giảng, làm bài nhóm và học trong thư viện','attend lectures, do group projects, and study in the library'],['giáo viên tiểu học','a primary school teacher','trường tiểu học','the primary school','soạn bài, dạy học sinh và chấm bài tập','prepare lessons, teach my pupils, and mark their homework'],['y tá','a nurse','bệnh viện','the hospital','chăm sóc bệnh nhân và ghi chép hồ sơ bệnh án','take care of patients and write medical records'],['chủ quán cà phê','a coffee shop owner','quán cà phê của tôi','my coffee shop','pha chế đồ uống và chào đón khách quen','make drinks and welcome our regular customers'],['lập trình viên','a software developer','công ty phần mềm','the software company','viết mã, kiểm tra lỗi và họp nhóm trực tuyến','write code, test for bugs, and join online team meetings']],
+C:[['Hà Nội','Hanoi'],['Thành phố Hồ Chí Minh','Ho Chi Minh City'],['Đà Nẵng','Da Nang'],['Cần Thơ','Can Tho'],['Huế','Hue']],
+WK:[['5 giờ 30 sáng','5:30 a.m.'],['6 giờ sáng','6:00 a.m.'],['6 giờ 30 sáng','6:30 a.m.'],['7 giờ sáng','7:00 a.m.']],
+BF:[['bánh mì trứng','bread with fried eggs'],['phở bò','beef noodle soup'],['xôi và sữa đậu nành','sticky rice and soy milk'],['cháo gà','chicken porridge'],['bún riêu','crab noodle soup']],
+CM:[['bằng xe máy','by motorbike'],['bằng xe buýt','by bus'],['bằng xe đạp','by bicycle'],['bằng tàu điện','by metro']],
+LU:[['cơm gà','chicken rice'],['bún chả','grilled pork with noodles'],['cơm tấm','broken rice with grilled pork'],['mì xào','fried noodles']],
+WE:[['trời nắng đẹp','the weather is sunny','một chiếc mũ','a hat'],['trời hơi mưa','it is a little rainy','một chiếc ô','an umbrella'],['trời khá nóng','it is quite hot','một chai nước lạnh','a cold bottle of water'],['trời mát mẻ','it is cool','một chiếc áo khoác mỏng','a light jacket']],
+FA:[['mẹ','my mother'],['bố','my father'],['em gái','my younger sister'],['ông bà','my grandparents']],
+DI:[['canh chua và cá kho','sour soup and braised fish'],['rau muống xào và thịt luộc','stir-fried water spinach and boiled pork'],['một nồi lẩu nhỏ','a small hotpot'],['đậu phụ sốt cà chua','tofu in tomato sauce']],
+EV:[['đi dạo quanh công viên','walk around the park'],['đọc một cuốn sách','read a book'],['gọi điện cho bố mẹ','call my parents'],['xem một bộ phim','watch a movie'],['luyện tiếng Anh','practice English']],
+GO:[['nói tiếng Anh trôi chảy hơn','speak English more fluently'],['tiết kiệm tiền để đi du lịch','save money for a trip'],['học thêm một kỹ năng mới','learn a new skill'],['sống khỏe mạnh hơn','live a healthier life']],
+S:{1:['Tôi sống ở {city} và hiện đang là {job}, một cuộc sống bận rộn nhưng rất thú vị.','I live in {city} and I am currently {job}, and it is a busy but very interesting life.'],
+2:['Mỗi ngày tôi thức dậy lúc {wake}, mở cửa sổ và uống một cốc nước ấm trước khi làm bất cứ việc gì khác.','Every day I wake up at {wake}, open the window, and drink a glass of warm water before I do anything else.'],
+3:['Sau đó tôi tập thể dục khoảng hai mươi phút để cơ thể tỉnh táo và có thêm năng lượng cho cả ngày.','After that I exercise for about twenty minutes so that my body feels awake and I have more energy for the whole day.'],
+4:['Bữa sáng của tôi thường là {bf}, vì món này nhanh, ngon và không làm tôi bị no quá.','My breakfast is usually {bf} because it is quick, tasty, and does not make me feel too full.'],
+5:['Khoảng bảy rưỡi, tôi đi đến {place} {cm}, và trên đường đi tôi thường nghe nhạc hoặc đọc tin tức.','At about half past seven, I go to {place} {cm}, and on the way I often listen to music or read the news.'],
+6:['Ở {place}, công việc chính của tôi là {task}, nên buổi sáng thường rất bận rộn.','At {place}, my main job is to {task}, so the morning is usually very busy.'],
+7:['Vào buổi trưa, tôi ăn {lunch} cùng vài người bạn và chúng tôi thường nói chuyện về phim ảnh, du lịch hay kế hoạch cuối tuần.','At noon I eat {lunch} with a few friends, and we usually talk about movies, travel, or our weekend plans.'],
+8:['Buổi chiều tôi tiếp tục làm việc, và nếu cảm thấy mệt thì tôi đứng dậy đi lại một chút hoặc uống một tách trà.','In the afternoon I keep working, and if I feel tired, I stand up, walk around a little, or drink a cup of tea.'],
+9:['Hôm nay {w}, vì vậy tôi mang theo {wi} để chuẩn bị cho chuyến đi về nhà.','Today {w}, so I bring {wi} to get ready for the trip home.'],
+10:['Khoảng sáu giờ chiều, tôi về nhà và giúp {fam} nấu {dinner}.',"At about six o'clock in the evening, I get home and help {fam} cook {dinner}."],
+11:['Cả nhà ngồi ăn với nhau, kể lại những chuyện vui trong ngày và cùng dọn dẹp bàn ăn khi bữa tối kết thúc.','The whole family sits down to eat together, shares the funny things from the day, and cleans the table when dinner is over.'],
+12:['Sau bữa tối, tôi thích {ev} để thư giãn sau một ngày dài.','After dinner, I like to {ev} to relax after a long day.'],
+13:['Trước khi đi ngủ, tôi viết nhật ký ngắn, kiểm tra lịch làm việc của ngày mai và tắt điện thoại để ngủ ngon hơn.','Before going to bed, I write a short diary, check my schedule for tomorrow, and turn off my phone so that I can sleep better.'],
+14:['Vào cuối tuần, tôi thường dành thời gian cho gia đình, dọn dẹp nhà cửa hoặc đi chợ mua rau củ tươi cho cả tuần.','On weekends, I usually spend time with my family, clean the house, or go to the market to buy fresh vegetables for the whole week.'],
+15:['Tôi biết cuộc sống hằng ngày của mình khá đơn giản, nhưng tôi thấy hạnh phúc vì mỗi ngày đều có những niềm vui nhỏ.','I know my daily life is quite simple, but I feel happy because every day has small joys.'],
+16:['Trong năm nay, tôi mong muốn {goal}, và tôi tin rằng chỉ cần cố gắng một chút mỗi ngày thì mục tiêu đó sẽ trở thành hiện thực.','This year I hope to {goal}, and I believe that if I try a little every day, this goal will come true.']}};
+function genPassage(){
+ let seen=[];try{seen=JSON.parse(localStorage.getItem('pe_keys')||'[]')}catch(e){}
+ const pk=l=>l[Math.random()*l.length|0],D=GD;let r;
+ for(let t=0;t<300;t++){
+  const j=pk(D.J),c=pk(D.C),w=pk(D.WK),bf=pk(D.BF),cm=pk(D.CM),lu=pk(D.LU),we=pk(D.WE),fa=pk(D.FA),di=pk(D.DI),ev=pk(D.EV),go=pk(D.GO);
+  const ids=[1,2,4,5,6,7,10,12,13,16].concat(sh([3,8,9,11,14,15]).slice(0,2)).sort((a,b)=>a-b);
+  const key=[j,c,w,bf,cm,lu,we,fa,di,ev,go].map(x=>x[0]).join('|')+ids.join('.');
+  if(seen.includes(key)&&t<299)continue;
+  const fx=(q,i)=>q.replace(/\{(\w+)\}/g,(m,k)=>({city:c[i],job:j[i],wake:w[i],bf:bf[i],place:j[2+i],task:j[4+i],cm:cm[i],lunch:lu[i],w:we[i],wi:we[2+i],fam:fa[i],dinner:di[i],ev:ev[i],goal:go[i]})[k]);
+  const en=ids.map(n=>fx(D.S[n][1],1));
+  const op=(L,x)=>{const o=sh(L.filter(y=>y!==x).map(y=>y[1])).slice(0,3);o.push(x[1]);const z=sh(o);return{options:z,a:z.indexOf(x[1])}};
+  r={id:'local',key,topic:'Một ngày của '+j[0],vi:ids.map(n=>fx(D.S[n][0],0)).join('\n'),en:en.join('\n'),words:(en.join(' ').match(/[A-Za-z0-9':.]+/g)||[]).length,
+   quiz:[{q:'What time does the writer wake up?',...op(D.WK,w)},{q:'What does the writer usually have for breakfast?',...op(D.BF,bf)},{q:'How does the writer go to work?',...op(D.CM,cm)},{q:'What does the writer like to do after dinner?',...op(D.EV,ev)}]};
+  seen.push(key);try{localStorage.setItem('pe_keys',JSON.stringify(seen.slice(-500)))}catch(e){}
+  break}
+ try{localStorage.setItem('pe_lp',JSON.stringify(r))}catch(e){}
+ return r}
+const lastLocal=()=>{try{return JSON.parse(localStorage.getItem('pe_lp'))}catch(e){return null}};
 /* ===== Viết · Đọc · Nói ===== */
 const STOP=new Set('that with this have from they their there what when which would could about after before because while your were been will into than then them some more very also just only over such each other these those'.split(' '));
 const wordsOf=t=>(t.match(/[A-Za-z']+/g)||[]).length;
@@ -292,9 +340,9 @@ function scoreWrite(t,p){
   msgs:(miss.length?`<b>Từ khóa còn thiếu:</b> ${miss.join(', ')}<br>`:'')+(er.length?`<b>Lưu ý ngữ pháp:</b><ul>${er.map(x=>'<li>'+x+'</li>').join('')}</ul>`:'Không phát hiện lỗi ngữ pháp phổ biến. 🎉')};
 }
 views.write=async()=>{
- const p=await api('GET','/passages/next?user_id='+uid+'&tab=write');
- if(!p.id){$('#v').innerHTML='<div class="card">Chưa có đoạn văn nào trong cơ sở dữ liệu.</div>';return}
- $('#v').innerHTML=`<div class="card"><div class="pic">✍️</div><h2>Viết: dịch sang tiếng Anh</h2><p class="note">${esc(p.topic)} · mỗi lần mở tab là một đoạn tiếng Việt khác, không lặp lại cho tới khi hết kho ${p.reset?'(đã bắt đầu vòng mới)':''}. Yêu cầu viết ít nhất <b>200 từ</b>.</p><div class="ex" style="font-size:17px;line-height:1.7">${esc(p.vi).replace(/\n/g,' ')}</div><textarea id="wtx" style="min-height:280px" placeholder="Viết bản dịch tiếng Anh ở đây..."></textarea><div class="meta"><b id="wc">0</b>/200 từ</div><button class="btn" id="wsb" disabled>Nộp bài và chấm điểm</button><button class="btn alt" onclick="go('write')">Đoạn khác ➜</button><div id="wr"></div></div>`;
+ let p=OFF?{}:await api('GET','/passages/next?user_id='+uid+'&tab=write');
+ if(!p.id)p=genPassage();
+ $('#v').innerHTML=`<div class="card"><div class="pic">✍️</div><h2>Viết: dịch sang tiếng Anh</h2><p class="note">${esc(p.topic)} · mỗi lần mở tab là một đoạn tiếng Việt khác, không lặp lại cho tới khi hết kho ${p.reset?'(đã bắt đầu vòng mới)':''}${p.id=='local'?' · đoạn văn được sinh tự động ngay trên trình duyệt':''}. Yêu cầu viết ít nhất <b>200 từ</b>.</p><div class="ex" style="font-size:17px;line-height:1.7">${esc(p.vi).replace(/\n/g,' ')}</div><textarea id="wtx" style="min-height:280px" placeholder="Viết bản dịch tiếng Anh ở đây..."></textarea><div class="meta"><b id="wc">0</b>/200 từ</div><button class="btn" id="wsb" disabled>Nộp bài và chấm điểm</button><button class="btn alt" onclick="go('write')">Đoạn khác ➜</button><div id="wr"></div></div>`;
  $('#wtx').oninput=()=>{const n=wordsOf($('#wtx').value);$('#wc').textContent=n;$('#wsb').disabled=n<200};
  $('#wsb').onclick=async()=>{const t=$('#wtx').value,r=scoreWrite(t,p);$('#wsb').disabled=true;
   await api('POST','/writings',{user_id:uid,passage_id:p.id,text:t,score:r.score,feedback:r.fb});
@@ -302,9 +350,9 @@ views.write=async()=>{
   $('#wr').innerHTML=`<div class="ex"><div class="big">${r.score}/10</div>${r.wc} từ · từ khóa bao phủ <b>${r.cov}%</b><br>${r.msgs}</div><h4>Bản dịch tham khảo</h4><div class="ex">${esc(p.en).replace(/\n/g,' ')}</div><button class="btn" onclick="go('read')">Sang tab Đọc ➜</button><p class="note">Điểm mang tính tham khảo: chấm theo độ phủ từ khóa, độ dài và lỗi ngữ pháp phổ biến.</p>`}
 };
 views.read=async(force)=>{
- const w=(await api('GET','/writings?user_id='+uid)).rows||[],last=!force&&w[0];
- const p=last?await api('GET','/passages/'+w[0].passage_id):await api('GET','/passages/next?user_id='+uid+'&tab=read');
- if(!p.id){$('#v').innerHTML='<div class="card">Đoạn văn này không còn trong cơ sở dữ liệu.</div>';return}
+ const w=OFF?[]:(await api('GET','/writings?user_id='+uid)).rows||[],last=!force&&w[0];
+ let p=OFF?{}:last?await api('GET','/passages/'+w[0].passage_id):await api('GET','/passages/next?user_id='+uid+'&tab=read');
+ if(!p.id)p=(!force&&lastLocal())||genPassage();
  const L=p.en.split('\n'),V=p.vi.split('\n');
  $('#v').innerHTML=`<div class="card"><div class="pic">📖</div><h2>Đọc: ${esc(p.topic)}</h2><p class="note">${last?'Đây là đoạn bạn vừa dịch ở tab Viết.':'Đoạn đọc mới.'} Bấm 🔊 để nghe, 🎤 để đọc thử, bấm vào câu để xem nghĩa tiếng Việt.</p><button class="btn" id="ra">🔊 Nghe cả đoạn</button><button class="btn alt" id="rn">Đoạn mới ➜</button>${L.map((x,i)=>`<div class="ex"><button class="btn alt" data-s="${i}">🔊</button><button class="btn alt" data-m="${i}">🎤</button> <span data-t="${i}" style="cursor:pointer">${esc(x)}</span><div class="note" id="vi${i}" hidden>${esc(V[i]||'')}</div><div id="pn${i}"></div></div>`).join('')}<button class="btn" id="rq">Làm 4 câu đọc hiểu ➜</button></div>`;
  $('#ra').onclick=()=>{speechSynthesis.cancel();const vo=speechSynthesis.getVoices().find(x=>x.lang.replace('_','-')==P.acc);L.forEach(x=>{const u=new SpeechSynthesisUtterance(x);u.lang=P.acc;if(vo)u.voice=vo;u.rate=.9;speechSynthesis.speak(u)})};
@@ -366,8 +414,11 @@ views.data=async()=>{
   refresh()};
 };
 async function boot(){
+ $('#nav').innerHTML=T.map(x=>`<button onclick="go('${x[0]}')">${x[1]} ${x[2]}</button>`).join('');
  const c=await api('GET','/content');
- if(!c.questions){$('#v').innerHTML='<div class="card"><h2>Không kết nối được máy chủ</h2><p>Hãy chạy <b>npm start</b> (Node 22.5 trở lên) rồi mở <b>http://localhost:3000</b>.</p></div>';return}
+ if(!c.questions){OFF=1;T.splice(0,T.length,...T.filter(x=>['write','read','speak'].includes(x[0])));
+  $('header').insertAdjacentHTML('beforeend','<p class="note">⚠️ Chưa kết nối được máy chủ dữ liệu (chạy <b>npm start</b> để dùng đầy đủ). Hiện dùng chế độ ngoại tuyến: Viết, Đọc, Nói vẫn hoạt động nhưng kết quả chưa được lưu.</p>');
+  go('write');return}
  applyContent(c);
  try{uid=+localStorage.getItem('pe_uid')||0}catch(e){}
  if(!uid||!(await load())){const n=(prompt('Nhập tên của bạn để lưu tiến độ và xếp hạng:','Học viên')||'Học viên').trim();uid=(await api('POST','/users',{name:n})).id;try{localStorage.setItem('pe_uid',uid)}catch(e){}await load()}
