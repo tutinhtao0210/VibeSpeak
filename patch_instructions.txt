@@ -1,0 +1,13 @@
+# Patch to add initial Career Simulator scaffold
+
+Files added under:
+- backend/
+- frontend/
+- docs/README-deploy.md
+
+To apply locally:
+- git checkout -b feature/career-sim-initial-scaffold
+- copy these files into the repo
+- git add .
+- git commit -m "chore: add initial career simulator scaffold (backend + frontend)"
+- git push origin feature/career-sim-initial-scaffold
