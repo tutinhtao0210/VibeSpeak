@@ -15,7 +15,7 @@ Lần chạy đầu tiên server tự tạo `pinkenglish.db`, chạy các file t
 | Nhóm | Endpoint |
 |---|---|
 | Nội dung | `GET /api/content`, `GET/POST/PUT/DELETE /api/questions[/:id]` |
-| Đoạn văn | `GET /api/passages/next?user_id&tab=write\|read` (không lặp theo từng tab), `GET /api/passages/:id` |
+| Đoạn văn | `GET /api/passages/next?user_id&tab=write\|read` (không lặp theo từng tab), `GET/PUT/DELETE /api/passages/:id`, `GET/POST /api/passages` |
 | Người học | `POST /api/users`, `PATCH/DELETE /api/users/:id`, `GET /api/state`, `GET /api/leaderboard` |
-| Kết quả | `/api/attempts`, `/api/answers`, `/api/days`, `/api/writings`, `/api/speeches`, `/api/notes` (đủ tạo, đọc, sửa, xóa) |
+| Kết quả | `/api/attempts`, `/api/days`, `/api/writings`, `/api/speeches`, `/api/notes` (tạo, đọc, sửa, xóa theo id); `POST /api/answers` (ghi từng câu trả lời) |
 | Chống trùng | `POST/DELETE /api/seen`, `POST/DELETE /api/wrong` |
