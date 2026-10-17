@@ -1,8 +1,0 @@
-{
-  "name": "pinkenglish",
-  "version": "2.0.0",
-  "private": true,
-  "description": "PinkEnglish – web học tiếng Anh, API + SQLite",
-  "scripts": { "start": "node server.js" },
-  "engines": { "node": ">=22.5" }
-}
